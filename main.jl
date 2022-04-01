@@ -34,7 +34,14 @@ function configure_optimizer(model)
     # set_optimizer_attribute(model, "time_limit", 30.0)
 end
 
-function save_variables(model)
+function configure_optimizer_glpk(model)
+    @info "Setting optimizer"
+    
+    set_optimizer(model, GLPK.Optimizer)
+ 
+end
+
+function save_variables(model, fname)
     @info "Saving results."
     x = all_variables(model)
     df = DataFrame(
@@ -42,12 +49,12 @@ function save_variables(model)
               :value => value.(x),
              )
     
-    CSV.write("results.csv", df)
+    CSV.write(fname*".csv", df)
 end
 
 
 function main()
-    fname = "gpscheduler.mps"
+    fname = "data/gpscheduler.mps"
 
     model = load_mps(fname)
     configure_optimizer(model)
@@ -56,12 +63,12 @@ function main()
     optimize!(model)
     @info "Done!"
 
-    if termination_status(model) ==  MathOptInterface.INFEASIBLE
-        @warn "Infeasible solution found 😱"
+    if termination_status(model) != MathOptInterface.OPTIMAL
+        @warn "Optimal solution not found 😱"
         return
     end
 
-    save_variables(model)
+    save_variables(model, fname)
 
     return model
     
