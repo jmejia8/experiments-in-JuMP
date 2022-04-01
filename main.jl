@@ -54,6 +54,7 @@ end
 
 
 function main()
+    # set here your data file name
     fname = "data/gpscheduler.mps"
 
     model = load_mps(fname)
